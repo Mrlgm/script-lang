@@ -1,3 +1,3 @@
 import Lang from "./src";
 
-new Lang(`let age = 45`);
+new Lang(`age >= 45`);
