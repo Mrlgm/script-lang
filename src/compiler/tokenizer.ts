@@ -9,15 +9,11 @@ enum DfaState {
 }
 
 enum TokenType {
+  Initial,
   Identifier,
   IntLiteral,
   GT,
   GE,
-}
-
-class Token {
-  type: TokenType = null;
-  value = null;
 }
 
 const isAlpha = (char: string) => {
@@ -27,6 +23,39 @@ const isAlpha = (char: string) => {
 const isDigit = (char: string) => {
   return /[0-9]/.test(char);
 };
+
+class Token {
+  type: TokenType = TokenType.Initial;
+  value: string = "";
+
+  get curToken() {
+    return { type: this.type, value: this.value };
+  }
+
+  setTokenType(type: TokenType) {
+    this.type = type;
+  }
+
+  add(char: string) {
+    this.value += char;
+  }
+
+  initToken = (char: string) => {
+    this.type = TokenType.Initial;
+    this.value = "";
+
+    if (isAlpha(char)) {
+      this.type = TokenType.Identifier;
+      this.add(char);
+    } else if (isDigit(char)) {
+      this.type = TokenType.IntLiteral;
+      this.add(char);
+    } else if (char === ">") {
+      this.type = TokenType.GT;
+      this.add(char);
+    }
+  };
+}
 
 /**
  * 词法分析函数
@@ -40,80 +69,54 @@ export default function tokenizer(code: string): Node[] {
   let current = 0;
   const tokens = [];
 
-  let value = "";
   let char = "";
-  let state: DfaState = DfaState.Initial;
 
   let token = new Token();
-
-  const initToken = (char: string) => {
-    if (value.length > 0) {
-      token.value = value;
-      tokens.push(token);
-
-      value = "";
-      token = new Token();
-    }
-
-    let newState = DfaState.Initial;
-    if (isAlpha(char)) {
-      newState = DfaState.Id;
-      token.type = TokenType.Identifier;
-      value += char;
-    } else if (isDigit(char)) {
-      newState = DfaState.IntLiteral;
-      token.type = TokenType.IntLiteral;
-      value += char;
-    } else if (char === ">") {
-      newState = DfaState.GT;
-      token.type = TokenType.GT;
-      value += char;
-    }
-
-    return newState;
-  };
 
   while (current < code.length) {
     char = code[current];
     ++current;
 
-    switch (state) {
-      case DfaState.Initial:
-        state = initToken(char);
+    switch (token.type) {
+      case TokenType.Initial:
+        token.initToken(char);
         break;
-      case DfaState.Id:
+      case TokenType.Identifier:
         if (isAlpha(char) || isDigit(char)) {
-          value += char;
+          token.add(char);
         } else {
-          state = initToken(char);
+          tokens.push(token.curToken);
+          token.initToken(char);
         }
         break;
-      case DfaState.IntLiteral:
+      case TokenType.IntLiteral:
         if (isDigit(char)) {
-          value += char;
+          token.add(char);
         } else {
-          state = initToken(char);
+          tokens.push(token.curToken);
+          token.initToken(char);
         }
         break;
-      case DfaState.GT:
+      case TokenType.GT:
         if (char === "=") {
-          token.type = TokenType.GE;
-          state = DfaState.GE;
-          value += char;
+          token.setTokenType(TokenType.GE);
+          token.add(char);
         } else {
-          state = initToken(char);
+          tokens.push(token.curToken);
+          token.initToken(char);
         }
         break;
-      case DfaState.GE:
-        state = initToken(char);
+      case TokenType.GE:
+        tokens.push(token.curToken);
+        token.initToken(char);
         break;
       default:
         throw new TypeError("I don‘t know what this character is: " + char);
     }
   }
 
-  if (value.length > 0) {
-    initToken(char);
+  if (token.value.length > 0) {
+    tokens.push(token.curToken);
   }
 
   return tokens;
