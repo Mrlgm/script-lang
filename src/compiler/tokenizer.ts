@@ -1,19 +1,16 @@
 import { Literal, Node } from "../type";
 
-enum DfaState {
-  Initial,
-  Id,
-  IntLiteral,
-  GT,
-  GE,
-}
-
 enum TokenType {
   Initial,
   Identifier,
   IntLiteral,
   GT,
   GE,
+  Id_int1,
+  Id_int2,
+  Id_int3,
+  Int,
+  Assignment,
 }
 
 const isAlpha = (char: string) => {
@@ -22,6 +19,10 @@ const isAlpha = (char: string) => {
 
 const isDigit = (char: string) => {
   return /[0-9]/.test(char);
+};
+
+const isBlank = (char: string) => {
+  return /\s/.test(char);
 };
 
 class Token {
@@ -45,13 +46,20 @@ class Token {
     this.value = "";
 
     if (isAlpha(char)) {
-      this.type = TokenType.Identifier;
+      if (char === "i") {
+        this.type = TokenType.Id_int1;
+      } else {
+        this.type = TokenType.Identifier;
+      }
       this.add(char);
     } else if (isDigit(char)) {
       this.type = TokenType.IntLiteral;
       this.add(char);
     } else if (char === ">") {
       this.type = TokenType.GT;
+      this.add(char);
+    } else if (char === "=") {
+      this.type = TokenType.Assignment;
       this.add(char);
     }
   };
@@ -107,6 +115,44 @@ export default function tokenizer(code: string): Node[] {
         }
         break;
       case TokenType.GE:
+        tokens.push(token.curToken);
+        token.initToken(char);
+        break;
+      case TokenType.Id_int1:
+        if (char === "n") {
+          token.setTokenType(TokenType.Id_int2);
+          token.add(char);
+        } else if (isDigit(char) || isAlpha(char)) {
+          token.setTokenType(TokenType.Identifier);
+          token.add(char);
+        } else {
+          tokens.push(token.curToken);
+          token.initToken(char);
+        }
+        break;
+      case TokenType.Id_int2:
+        if (char === "t") {
+          token.setTokenType(TokenType.Id_int3);
+          token.add(char);
+        } else if (isDigit(char) || isAlpha(char)) {
+          token.setTokenType(TokenType.Identifier);
+          token.add(char);
+        } else {
+          tokens.push(token.curToken);
+          token.initToken(char);
+        }
+        break;
+      case TokenType.Id_int3:
+        if (isBlank(char)) {
+          token.setTokenType(TokenType.Int);
+          tokens.push(token.curToken);
+          token.initToken(char);
+        } else {
+          token.setTokenType(TokenType.Identifier);
+          token.add(char);
+        }
+        break;
+      case TokenType.Assignment:
         tokens.push(token.curToken);
         token.initToken(char);
         break;
