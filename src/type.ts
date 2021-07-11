@@ -9,6 +9,8 @@ export interface Statement extends Node {}
 export interface Pattern extends Node {}
 /** 表达式 */
 export interface Expression extends Node, Pattern {}
+/** 声明 */
+export interface Declaration extends Statement {}
 
 export interface Program extends Node {
   type: "Program";
@@ -53,4 +55,16 @@ export interface BinaryExpression extends Expression {
   operator: BinaryOperator;
   left: Expression;
   right: Expression;
+}
+
+export interface VariableDeclaration extends Declaration {
+  type: "VariableDeclaration";
+  declarations: [VariableDeclarator];
+  kind: "var" | "let" | "const";
+}
+
+export interface VariableDeclarator extends Node {
+  type: "VariableDeclarator";
+  id: Pattern;
+  init: Expression | null;
 }

@@ -1,16 +1,24 @@
 import { Literal, Node } from "../type";
 
-enum TokenType {
+enum DfaState {}
+
+export enum TokenType {
   Initial,
   Identifier,
   IntLiteral,
   GT,
   GE,
+  // TokenType不应该有中间态
   Id_int1,
   Id_int2,
   Id_int3,
   Int,
   Assignment,
+}
+
+export interface TokenNode {
+  type: TokenType;
+  value: string;
 }
 
 const isAlpha = (char: string) => {
@@ -73,7 +81,7 @@ class Token {
  * @param code 代码
  * @returns
  */
-export default function tokenizer(code: string): Node[] {
+export default function tokenizer(code: string): TokenNode[] {
   let current = 0;
   const tokens = [];
 
