@@ -1,11 +1,17 @@
-import { intDeclare } from "./compiler/parser";
+import { evaluate, intDeclare, prog } from "./compiler/parser";
 import tokenizer from "./compiler/tokenizer";
 
 export default class Lang {
-  constructor(code: string) {
+  intDeclare(code: string) {
     const tokens = tokenizer(code);
-    console.log(tokens);
-    const node = intDeclare(tokens)
-    console.log(node)
+    const node = intDeclare(tokens);
+    console.dir(JSON.stringify(node));
+  }
+
+  prog(code: string) {
+    const tokens = tokenizer(code);
+    const node = prog(tokens);
+    console.dir(JSON.stringify(node));
+    evaluate(node, "");
   }
 }

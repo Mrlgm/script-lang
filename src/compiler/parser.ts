@@ -38,18 +38,69 @@ export function intDeclare(tokens: TokenNode[]) {
   return node;
 }
 
-function additive(tokens: TokenNode[]): SimpleASTNode {
-  let token = tokens[0];
-  let node = null;
-  if (token !== null && token.type === TokenType.IntLiteral) {
-    node = new SimpleASTNode(ASTNodeType.Literal, token.value);
+export function prog(tokens: TokenNode[]) {
+  const node = new SimpleASTNode(ASTNodeType.Program, "Calculator");
+  const child = additive(tokens);
+  if (child != null) {
+    node.addChild(child);
   }
   return node;
 }
 
+function additive(tokens: TokenNode[]): SimpleASTNode {
+  let token = tokens[0];
+  let node = null;
+  if (token !== undefined && token.type === TokenType.IntLiteral) {
+    let child1 = new SimpleASTNode(ASTNodeType.Literal, token.value);
+    node = child1;
+    tokens.shift();
+    token = tokens[0];
+    if (token !== undefined && token.type === TokenType.Push) {
+      tokens.shift();
+      const child2 = additive(tokens);
+      if (child2 !== null) {
+        node = new SimpleASTNode(ASTNodeType.Additive, token.value);
+        node.addChild(child1);
+        node.addChild(child2);
+      }
+    } else {
+    }
+  }
+  return node;
+}
+
+export function evaluate(node: SimpleASTNode, indent: string) {
+  let result = 0;
+  console.log(indent + "Calculating: " + node.nodeType);
+  switch (node.nodeType) {
+    case ASTNodeType.Program:
+      for (const child of node.children) {
+        result = evaluate(child, indent + "\t");
+      }
+      break;
+    case ASTNodeType.Additive:
+      const child1 = node.children[0];
+      let value1 = evaluate(child1, indent + "\t");
+
+      const child2 = node.children[1];
+      let value2 = evaluate(child2, indent + "\t");
+      if (node.text === "+") {
+        result = value1 + value2;
+      } else {
+        result = value1 - value2;
+      }
+      break;
+    case ASTNodeType.Literal:
+      result = Number(node.text);
+      break;
+  }
+  console.log("Result:", result);
+  return result;
+}
+
 class SimpleASTNode {
   parent = null;
-  children = [];
+  children: SimpleASTNode[] = [];
   nodeType: ASTNodeType = ASTNodeType.Program;
   text: string = null;
 
@@ -67,4 +118,5 @@ enum ASTNodeType {
   VariableDeclaration = "VariableDeclaration",
   Literal = "Literal",
   Program = "Program",
+  Additive = "Additive",
 }

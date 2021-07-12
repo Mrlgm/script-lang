@@ -14,6 +14,7 @@ export enum TokenType {
   Id_int3,
   Int,
   Assignment,
+  Push,
 }
 
 export interface TokenNode {
@@ -68,6 +69,9 @@ class Token {
       this.add(char);
     } else if (char === "=") {
       this.type = TokenType.Assignment;
+      this.add(char);
+    } else if (char === "+") {
+      this.type = TokenType.Push;
       this.add(char);
     }
   };
@@ -161,6 +165,10 @@ export default function tokenizer(code: string): TokenNode[] {
         }
         break;
       case TokenType.Assignment:
+        tokens.push(token.curToken);
+        token.initToken(char);
+        break;
+      case TokenType.Push:
         tokens.push(token.curToken);
         token.initToken(char);
         break;
