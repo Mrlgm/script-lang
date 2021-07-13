@@ -27,6 +27,7 @@ export function intDeclare(tokens: TokenNode[]) {
             "invalide variable initialization, expecting an expression"
           );
         } else {
+          evaluate(child, "");
           node.addChild(child);
         }
       } else {
@@ -47,15 +48,18 @@ export function prog(tokens: TokenNode[]) {
   return node;
 }
 
+/**
+ * A -> M | M + A
+ *
+ * @param tokens
+ * @returns
+ */
 function additive(tokens: TokenNode[]): SimpleASTNode {
+  let child1 = multiplicative(tokens);
+  let node: SimpleASTNode = child1;
   let token = tokens[0];
-  let node = null;
-  if (token !== undefined && token.type === TokenType.IntLiteral) {
-    let child1 = new SimpleASTNode(ASTNodeType.Literal, token.value);
-    node = child1;
-    tokens.shift();
-    token = tokens[0];
-    if (token !== undefined && token.type === TokenType.Push) {
+  if (child1 !== null && token !== undefined) {
+    if (token.type === TokenType.Push) {
       tokens.shift();
       const child2 = additive(tokens);
       if (child2 !== null) {
@@ -69,8 +73,37 @@ function additive(tokens: TokenNode[]): SimpleASTNode {
   return node;
 }
 
+/**
+ * M -> num | num * M
+ * @param tokens
+ */
+function multiplicative(tokens: TokenNode[]) {
+  let token = tokens[0];
+  let node: SimpleASTNode = null;
+  if (token !== undefined && token.type === TokenType.IntLiteral) {
+    let child1 = new SimpleASTNode(ASTNodeType.Literal, token.value);
+    node = child1;
+    tokens.shift();
+    token = tokens[0];
+    if (token !== undefined && token.type === TokenType.Star) {
+      tokens.shift();
+      const child2 = multiplicative(tokens);
+      if (child2 !== null) {
+        node = new SimpleASTNode(ASTNodeType.Multiplicative, token.value);
+        node.addChild(child1);
+        node.addChild(child2);
+      }
+    }
+  }
+  return node;
+}
+
 export function evaluate(node: SimpleASTNode, indent: string) {
   let result = 0;
+  let child1: SimpleASTNode = null;
+  let child2: SimpleASTNode = null;
+  let value1: number = 0;
+  let value2: number = 0;
   console.log(indent + "Calculating: " + node.nodeType);
   switch (node.nodeType) {
     case ASTNodeType.Program:
@@ -79,15 +112,27 @@ export function evaluate(node: SimpleASTNode, indent: string) {
       }
       break;
     case ASTNodeType.Additive:
-      const child1 = node.children[0];
-      let value1 = evaluate(child1, indent + "\t");
+      child1 = node.children[0];
+      value1 = evaluate(child1, indent + "\t");
 
-      const child2 = node.children[1];
-      let value2 = evaluate(child2, indent + "\t");
+      child2 = node.children[1];
+      value2 = evaluate(child2, indent + "\t");
       if (node.text === "+") {
         result = value1 + value2;
       } else {
         result = value1 - value2;
+      }
+      break;
+    case ASTNodeType.Multiplicative:
+      child1 = node.children[0];
+      value1 = evaluate(child1, indent + "\t");
+
+      child2 = node.children[1];
+      value2 = evaluate(child2, indent + "\t");
+      if (node.text === "*") {
+        result = value1 * value2;
+      } else {
+        result = value1 / value2;
       }
       break;
     case ASTNodeType.Literal:
@@ -119,4 +164,5 @@ enum ASTNodeType {
   Literal = "Literal",
   Program = "Program",
   Additive = "Additive",
+  Multiplicative = "Multiplicative",
 }

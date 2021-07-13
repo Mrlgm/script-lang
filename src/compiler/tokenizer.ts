@@ -15,6 +15,7 @@ export enum TokenType {
   Int,
   Assignment,
   Push,
+  Star,
 }
 
 export interface TokenNode {
@@ -72,6 +73,9 @@ class Token {
       this.add(char);
     } else if (char === "+") {
       this.type = TokenType.Push;
+      this.add(char);
+    } else if (char === "*") {
+      this.type = TokenType.Star;
       this.add(char);
     }
   };
@@ -169,6 +173,10 @@ export default function tokenizer(code: string): TokenNode[] {
         token.initToken(char);
         break;
       case TokenType.Push:
+        tokens.push(token.curToken);
+        token.initToken(char);
+        break;
+      case TokenType.Star:
         tokens.push(token.curToken);
         token.initToken(char);
         break;
