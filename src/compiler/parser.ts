@@ -57,19 +57,22 @@ export function prog(tokens: TokenNode[]) {
 function additive(tokens: TokenNode[]): SimpleASTNode {
   let child1 = multiplicative(tokens);
   let node: SimpleASTNode = child1;
-  let token = tokens[0];
-  if (child1 !== null && token !== undefined) {
-    if (token.type === TokenType.Push) {
-      tokens.shift();
-      const child2 = additive(tokens);
-      if (child2 !== null) {
+  if (child1 !== null) {
+    while (true) {
+      let token = tokens[0];
+      if (token !== undefined && token.type === TokenType.Push) {
+        tokens.shift();
         node = new SimpleASTNode(ASTNodeType.Additive, token.value);
+        let child2 = multiplicative(tokens);
         node.addChild(child1);
         node.addChild(child2);
+        child1 = node; 
+      } else {
+        break;
       }
-    } else {
     }
   }
+
   return node;
 }
 

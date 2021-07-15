@@ -4,6 +4,6 @@ import Lang from "./src";
 
 const lang = new Lang();
 
-lang.intDeclare(`int age = 45 + 3 + 4`);
+// lang.intDeclare(`int age = 45 + 3 + 4`);
 
-lang.prog(`45 + 3 * 6 * 7`);
+lang.prog(`45 + 3 + 6 + 7`);
