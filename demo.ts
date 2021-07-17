@@ -1,9 +1,7 @@
-import Lang from "./src";
+import SimpleLexer from "./src/lexicalAnalysis/SimpleLexer";
 
-// new Lang(`age >= 45`);
+let simpleLexer = new SimpleLexer();
 
-const lang = new Lang();
+const tokens = simpleLexer.tokenizer("a * 2");
 
-// lang.intDeclare(`int age = 45 + 3 + 4`);
-
-lang.prog(`45 + 3 + 6 + 7`);
+console.log(tokens);
