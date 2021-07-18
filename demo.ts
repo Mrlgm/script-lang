@@ -1,7 +1,8 @@
-import SimpleLexer from "./src/lexicalAnalysis/SimpleLexer";
 
-let simpleLexer = new SimpleLexer();
+import SimpleParser from "./src/syntaxAnalysis/SimpleParser";
 
-const tokens = simpleLexer.tokenizer("a * 2");
+let simpleParser = new SimpleParser();
 
-console.log(tokens);
+const ast = simpleParser.parse("int a = 2")
+
+console.log(JSON.stringify(ast) );

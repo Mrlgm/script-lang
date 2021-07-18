@@ -1,6 +1,7 @@
 import { DfaState } from "./enum/DfaState";
 import { TokenType } from "./enum/TokenType";
 import SimpleToken from "./SimpleToken";
+import TokenReader from "./TokenReader";
 
 const isAlpha = (char: string) => {
   return /[a-zA-Z]/.test(char);
@@ -38,8 +39,12 @@ export default class SimpleLexer {
 
     let newState = DfaState.Initial;
     if (isAlpha(char)) {
+      if (char === "i") {
+        newState = DfaState.Id_int1;
+      } else {
+        newState = DfaState.Identifier;
+      }
       this.token.type = TokenType.Identifier;
-      newState = DfaState.Identifier;
       this.tokenText += char;
     } else if (isDigit(char)) {
       this.token.type = TokenType.IntLiteral;
@@ -79,10 +84,41 @@ export default class SimpleLexer {
           state = this.initToken(char);
           break;
         case DfaState.Identifier:
-          if (isAlpha(char)) {
+          if (isAlpha(char) || isDigit(char)) {
             this.tokenText += char;
           } else {
             state = this.initToken(char);
+          }
+          break;
+        case DfaState.Id_int1:
+          if (char === "n") {
+            state = DfaState.Id_int2;
+            this.tokenText += char;
+          } else if (isAlpha(char) || isDigit(char)) {
+            state = DfaState.Identifier;
+            this.tokenText += char;
+          } else {
+            state = this.initToken(char);
+          }
+          break;
+        case DfaState.Id_int2:
+          if (char === "t") {
+            state = DfaState.Id_int3;
+            this.tokenText += char;
+          } else if (isAlpha(char) || isDigit(char)) {
+            state = DfaState.Identifier;
+            this.tokenText += char;
+          } else {
+            state = this.initToken(char);
+          }
+          break;
+        case DfaState.Id_int3:
+          if (isBlank(char)) {
+            this.token.type = TokenType.Int;
+            state = this.initToken(char);
+          } else {
+            state = DfaState.Identifier;
+            this.tokenText += char;
           }
           break;
         case DfaState.IntLiteral:
@@ -118,6 +154,6 @@ export default class SimpleLexer {
     }
 
     this.initToken(char);
-    return this.tokens;
+    return new TokenReader(this.tokens);
   }
 }
