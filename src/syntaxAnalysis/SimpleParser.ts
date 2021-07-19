@@ -8,7 +8,6 @@ export default class SimpleParser {
   parse(script: string) {
     const lexer = new SimpleLexer();
     const tokens = lexer.tokenizer(script);
-    console.log(tokens);
     const rootNode = this.prog(tokens);
 
     return rootNode;
@@ -64,17 +63,24 @@ export default class SimpleParser {
     return node;
   }
 
+  /**
+   * A -> M | M + M
+   * @param tokens 
+   * @returns 
+   */
   additive(tokens: TokenReader) {
+    let child1 = this.multiplicative(tokens);
     let token = tokens.peek();
-    let node: SimpleASTNode = null;
+    let node: SimpleASTNode = child1;
 
-    if (token !== null && token.getType() === TokenType.IntLiteral) {
-      let child1 = new SimpleASTNode(ASTNodeType.Literal, token.getValue());
-      node = child1;
+    if (
+      child1 !== null &&
+      token !== null &&
+      token.getType() === TokenType.Push
+    ) {
       tokens.read();
-      token = tokens.peek();
-      if (token !== null && token.getType() === TokenType.Push) {
-        let child2 = this.additive(tokens);
+      let child2 = this.multiplicative(tokens);
+      if (child2 !== null) {
         node = new SimpleASTNode(ASTNodeType.Additive, token.getValue());
         node.addChild(child1);
         node.addChild(child2);
@@ -82,5 +88,38 @@ export default class SimpleParser {
     }
 
     return node;
+  }
+
+  /**
+   * M -> num | num * M
+   * @param tokens
+   */
+  multiplicative(tokens: TokenReader) {
+    let token = tokens.peek();
+    let node: SimpleASTNode = null;
+    if (token !== null && token.getType() === TokenType.IntLiteral) {
+      let child1 = new SimpleASTNode(ASTNodeType.Literal, token.getValue());
+      node = child1;
+      tokens.read();
+      token = tokens.peek();
+      if (token !== null && token.getType() === TokenType.Star) {
+        tokens.read();
+        let child2 = this.multiplicative(tokens);
+        node = new SimpleASTNode(ASTNodeType.Multiplicative, token.getValue());
+        if (child2 !== null) {
+          node.addChild(child1);
+          node.addChild(child2);
+        }
+      }
+    }
+
+    return node;
+  }
+
+  dumpAST(node: SimpleASTNode, indent: string) {
+    console.log(indent + node.nodeType + " " + node.text);
+    for (const child of node.children) {
+      this.dumpAST(child, indent + "\t");
+    }
   }
 }
