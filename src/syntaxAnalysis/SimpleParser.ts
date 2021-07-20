@@ -64,26 +64,28 @@ export default class SimpleParser {
   }
 
   /**
-   * A -> M | M + M
-   * @param tokens 
-   * @returns 
+   * A -> M(+ M)*
+   * @param tokens
+   * @returns
    */
   additive(tokens: TokenReader) {
     let child1 = this.multiplicative(tokens);
     let token = tokens.peek();
     let node: SimpleASTNode = child1;
 
-    if (
-      child1 !== null &&
-      token !== null &&
-      token.getType() === TokenType.Push
-    ) {
-      tokens.read();
-      let child2 = this.multiplicative(tokens);
-      if (child2 !== null) {
+    while (true) {
+      if (token !== null && token.getType() === TokenType.Push) {
         node = new SimpleASTNode(ASTNodeType.Additive, token.getValue());
+        tokens.read();
+        let child2 = this.multiplicative(tokens);
         node.addChild(child1);
         node.addChild(child2);
+        token = tokens.peek();
+        if (token !== null) {
+          child1 = node;
+        }
+      } else {
+        break;
       }
     }
 
