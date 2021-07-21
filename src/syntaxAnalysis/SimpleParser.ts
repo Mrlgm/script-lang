@@ -55,8 +55,16 @@ export default class SimpleParser {
         if (token !== null && token.getType() === TokenType.Assignment) {
           tokens.read();
           const child = this.additive(tokens);
-          node.addChild(child);
+          if (child !== null) {
+            node.addChild(child);
+          } else {
+            throw new Error(
+              "invalid variable initialization, expecting an expression"
+            );
+          }
         }
+      } else {
+        throw new Error("variable name expected");
       }
     }
 
@@ -83,6 +91,10 @@ export default class SimpleParser {
         token = tokens.peek();
         if (token !== null) {
           child1 = node;
+        } else {
+          throw new Error(
+            "invalid additive expression, expecting the right part."
+          );
         }
       } else {
         break;
@@ -111,6 +123,10 @@ export default class SimpleParser {
         if (child2 !== null) {
           node.addChild(child1);
           node.addChild(child2);
+        } else {
+          throw new Error(
+            "invalid multiplicative expression, expecting the right part."
+          );
         }
       }
     }
