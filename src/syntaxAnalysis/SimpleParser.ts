@@ -134,6 +134,31 @@ export default class SimpleParser {
     return node;
   }
 
+  assignmentStatement(tokens: TokenReader) {
+    let node: SimpleASTNode = null;
+    let token = tokens.peek();
+    if (token !== null && token.getType() === TokenType.Identifier) {
+      tokens.read();
+      node = new SimpleASTNode(ASTNodeType.AssignmentStmt, token.getValue());
+      token = tokens.peek();
+      if (token !== null && token.getType() === TokenType.Assignment) {
+        tokens.read();
+        let child = this.additive(tokens);
+        if (child !== null) {
+          node.addChild(child);
+        } else {
+          throw new Error(
+            "invalid assignment statement, expecting an expression"
+          );
+        }
+      } else {
+        tokens.unread(); //回溯，吐出之前消化掉的标识符
+        node = null;
+      }
+    }
+    return node;
+  }
+
   dumpAST(node: SimpleASTNode, indent: string) {
     console.log(indent + node.nodeType + " " + node.text);
     for (const child of node.children) {
