@@ -11,4 +11,5 @@ export enum DfaState {
   Assignment,
   Push,
   Star,
+  SemiColon
 }

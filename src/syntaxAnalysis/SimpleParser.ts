@@ -21,15 +21,15 @@ export default class SimpleParser {
     // }
 
     while (tokens.peek() != null) {
-      const child = this.intDeclare(tokens);
+      let child = this.intDeclare(tokens);
 
-      // if (child == null) {
-      //     child = expressionStatement(tokens);
-      // }
+      if (child === null) {
+        child = this.expressionStatement(tokens);
+      }
 
-      // if (child == null) {
-      //     child = assignmentStatement(tokens);
-      // }
+      if (child === null) {
+        child = this.assignmentStatement(tokens);
+      }
 
       if (child !== null) {
         node.addChild(child);
@@ -65,6 +65,15 @@ export default class SimpleParser {
         }
       } else {
         throw new Error("variable name expected");
+      }
+
+      if (node != null) {
+        token = tokens.peek();
+        if (token != null && token.getType() == TokenType.SemiColon) {
+          tokens.read();
+        } else {
+          throw new Error("invalid statement, expecting semicolon");
+        }
       }
     }
 
@@ -134,6 +143,31 @@ export default class SimpleParser {
     return node;
   }
 
+  /**
+   *
+   * @param tokens
+   * @returns
+   */
+  expressionStatement(tokens: TokenReader) {
+    const pos = tokens.getPosition();
+    let node = this.additive(tokens);
+    if (node !== null) {
+      let token = tokens.peek();
+      if (token !== null && token.getType() === TokenType.SemiColon) {
+        tokens.read();
+      } else {
+        node = null;
+        tokens.setPosition(pos); // 回溯
+      }
+    }
+    return node;
+  }
+
+  /**
+   *
+   * @param tokens
+   * @returns
+   */
   assignmentStatement(tokens: TokenReader) {
     let node: SimpleASTNode = null;
     let token = tokens.peek();
@@ -159,6 +193,11 @@ export default class SimpleParser {
     return node;
   }
 
+  /**
+   *
+   * @param node
+   * @param indent
+   */
   dumpAST(node: SimpleASTNode, indent: string) {
     console.log(indent + node.nodeType + " " + node.text);
     for (const child of node.children) {

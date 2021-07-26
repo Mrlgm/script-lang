@@ -8,4 +8,5 @@ export enum TokenType {
   Assignment = "Assignment",
   Push = "Push",
   Star = "Star",
+  SemiColon = "SemiColon",
 }
