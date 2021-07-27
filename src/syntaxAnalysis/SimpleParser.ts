@@ -81,7 +81,8 @@ export default class SimpleParser {
   }
 
   /**
-   * A -> M(+ M)*
+   * additive -> multiplicative ( (+ | -) multiplicative)*
+   * 
    * @param tokens
    * @returns
    */
@@ -99,11 +100,11 @@ export default class SimpleParser {
         node = new SimpleASTNode(ASTNodeType.Additive, token.getValue());
         tokens.read();
         let child2 = this.multiplicative(tokens);
-        node.addChild(child1);
-        node.addChild(child2);
-        token = tokens.peek();
-        if (token !== null) {
+        if (child2 !== null) {
+          node.addChild(child1);
+          node.addChild(child2);
           child1 = node;
+          token = tokens.peek();
         } else {
           throw new Error(
             "invalid additive expression, expecting the right part."
@@ -118,33 +119,36 @@ export default class SimpleParser {
   }
 
   /**
-   * M -> num | num * M
+   * multiplicative -> primary ( (* | /) primary)*
+   * 
    * @param tokens
    */
   multiplicative(tokens: TokenReader) {
+    let child1 = this.primary(tokens);
+    let node: SimpleASTNode = child1;
     let token = tokens.peek();
-    let node: SimpleASTNode = null;
-    if (token !== null && token.getType() === TokenType.IntLiteral) {
-      let child1 = new SimpleASTNode(ASTNodeType.Literal, token.getValue());
-      node = child1;
-      tokens.read();
-      token = tokens.peek();
+    while (true) {
       if (
         token !== null &&
         (token.getType() === TokenType.Star ||
           token.getType() === TokenType.Slash)
       ) {
         tokens.read();
-        let child2 = this.multiplicative(tokens);
+
+        let child2 = this.primary(tokens);
         node = new SimpleASTNode(ASTNodeType.Multiplicative, token.getValue());
         if (child2 !== null) {
           node.addChild(child1);
           node.addChild(child2);
+          token = tokens.peek();
+          child1 = node;
         } else {
           throw new Error(
             "invalid multiplicative expression, expecting the right part."
           );
         }
+      } else {
+        break;
       }
     }
 
@@ -153,6 +157,7 @@ export default class SimpleParser {
 
   /**
    * primary -> IntLiteral | Id | (additive)
+   * 
    * @param tokens
    * @returns
    */
