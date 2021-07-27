@@ -13,6 +13,12 @@ export default class SimpleParser {
     return rootNode;
   }
 
+  /**
+   * program -> intDeclare | expressionStatement | assignmentStatement
+   *
+   * @param tokens
+   * @returns
+   */
   prog(tokens: TokenReader) {
     const node = new SimpleASTNode(ASTNodeType.Program, "pwc");
     // const child = additive(tokens);
@@ -40,6 +46,12 @@ export default class SimpleParser {
     return node;
   }
 
+  /**
+   * intDeclare -> 'int' Id ( = additive) ';'
+   *
+   * @param tokens
+   * @returns
+   */
   intDeclare(tokens: TokenReader) {
     let token = tokens.peek();
     let node: SimpleASTNode = null;
@@ -82,7 +94,7 @@ export default class SimpleParser {
 
   /**
    * additive -> multiplicative ( (+ | -) multiplicative)*
-   * 
+   *
    * @param tokens
    * @returns
    */
@@ -120,7 +132,7 @@ export default class SimpleParser {
 
   /**
    * multiplicative -> primary ( (* | /) primary)*
-   * 
+   *
    * @param tokens
    */
   multiplicative(tokens: TokenReader) {
@@ -157,7 +169,7 @@ export default class SimpleParser {
 
   /**
    * primary -> IntLiteral | Id | (additive)
-   * 
+   *
    * @param tokens
    * @returns
    */
@@ -177,6 +189,7 @@ export default class SimpleParser {
   }
 
   /**
+   * expressionStatement -> additive ';'
    *
    * @param tokens
    * @returns
@@ -197,7 +210,8 @@ export default class SimpleParser {
   }
 
   /**
-   *
+   * assignmentStatement -> Id = additive ';'
+   * 
    * @param tokens
    * @returns
    */
