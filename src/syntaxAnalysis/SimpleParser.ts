@@ -91,7 +91,11 @@ export default class SimpleParser {
     let node: SimpleASTNode = child1;
 
     while (true) {
-      if (token !== null && token.getType() === TokenType.Push) {
+      if (
+        token !== null &&
+        (token.getType() === TokenType.Push ||
+          token.getType() === TokenType.Minus)
+      ) {
         node = new SimpleASTNode(ASTNodeType.Additive, token.getValue());
         tokens.read();
         let child2 = this.multiplicative(tokens);
@@ -125,7 +129,11 @@ export default class SimpleParser {
       node = child1;
       tokens.read();
       token = tokens.peek();
-      if (token !== null && token.getType() === TokenType.Star) {
+      if (
+        token !== null &&
+        (token.getType() === TokenType.Star ||
+          token.getType() === TokenType.Slash)
+      ) {
         tokens.read();
         let child2 = this.multiplicative(tokens);
         node = new SimpleASTNode(ASTNodeType.Multiplicative, token.getValue());
@@ -140,6 +148,26 @@ export default class SimpleParser {
       }
     }
 
+    return node;
+  }
+
+  /**
+   * primary -> IntLiteral | Id | (additive)
+   * @param tokens
+   * @returns
+   */
+  primary(tokens: TokenReader) {
+    let token = tokens.peek();
+    let node: SimpleASTNode = null;
+    if (token !== null) {
+      if (token.getType() === TokenType.IntLiteral) {
+        tokens.read();
+        node = new SimpleASTNode(ASTNodeType.Literal, token.getValue());
+      } else if (token.getType() === TokenType.Identifier) {
+        tokens.read();
+        node = new SimpleASTNode(ASTNodeType.Identifier, token.getValue());
+      }
+    }
     return node;
   }
 

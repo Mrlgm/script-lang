@@ -7,6 +7,8 @@ export enum TokenType {
   Int = "Int",
   Assignment = "Assignment",
   Push = "Push",
+  Minus = "Minus",
   Star = "Star",
+  Slash = "Slash",
   SemiColon = "SemiColon",
 }

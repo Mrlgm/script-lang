@@ -10,6 +10,8 @@ export enum DfaState {
   Int,
   Assignment,
   Push,
+  Minus,
   Star,
-  SemiColon
+  Slash,
+  SemiColon,
 }

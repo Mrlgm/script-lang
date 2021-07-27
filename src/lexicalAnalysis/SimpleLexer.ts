@@ -62,9 +62,17 @@ export default class SimpleLexer {
       this.token.type = TokenType.Push;
       newState = DfaState.Push;
       this.tokenText += char;
+    } else if (char === "-") {
+      this.token.type = TokenType.Minus;
+      newState = DfaState.Minus;
+      this.tokenText += char;
     } else if (char === "*") {
       this.token.type = TokenType.Star;
       newState = DfaState.Star;
+      this.tokenText += char;
+    } else if (char === "/") {
+      this.token.type = TokenType.Slash;
+      newState = DfaState.Slash;
       this.tokenText += char;
     } else if (char === ";") {
       this.token.type = TokenType.SemiColon;
@@ -145,7 +153,9 @@ export default class SimpleLexer {
         case DfaState.GE:
         case DfaState.Assignment:
         case DfaState.Push:
+        case DfaState.Minus:
         case DfaState.Star:
+        case DfaState.Slash:
         case DfaState.SemiColon:
           state = this.initToken(char);
           break;

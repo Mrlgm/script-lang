@@ -4,6 +4,7 @@ export enum ASTNodeType {
   Program = "Program",
   Additive = "Additive",
   Multiplicative = "Multiplicative",
-  VariableDeclarator="VariableDeclarator",
-  AssignmentStmt="AssignmentStmt"
+  VariableDeclarator = "VariableDeclarator",
+  AssignmentStmt = "AssignmentStmt",
+  Identifier = "Identifier",
 }
