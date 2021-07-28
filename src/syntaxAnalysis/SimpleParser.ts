@@ -183,6 +183,21 @@ export default class SimpleParser {
       } else if (token.getType() === TokenType.Identifier) {
         tokens.read();
         node = new SimpleASTNode(ASTNodeType.Identifier, token.getValue());
+      } else if (token.getType() === TokenType.LeftParen) {
+        tokens.read();
+        node = this.additive(tokens);
+        if (node !== null) {
+          token = tokens.peek();
+          if (token !== null && token.getType() === TokenType.RightParen) {
+            tokens.read();
+          } else {
+            throw Error("expecting right parenthesis");
+          }
+        } else {
+          throw new Error(
+            "expecting an additive expression inside parenthesis"
+          );
+        }
       }
     }
     return node;
@@ -211,7 +226,7 @@ export default class SimpleParser {
 
   /**
    * assignmentStatement -> Id = additive ';'
-   * 
+   *
    * @param tokens
    * @returns
    */

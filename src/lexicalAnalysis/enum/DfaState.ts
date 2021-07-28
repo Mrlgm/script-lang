@@ -14,4 +14,6 @@ export enum DfaState {
   Star,
   Slash,
   SemiColon,
+  LeftParen,
+  RightParen
 }

@@ -11,4 +11,6 @@ export enum TokenType {
   Star = "Star",
   Slash = "Slash",
   SemiColon = "SemiColon",
+  LeftParen = "LeftParen",
+  RightParen = "RightParen",
 }
