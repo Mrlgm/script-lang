@@ -1,7 +1,11 @@
-import SimpleParser from "./src/syntaxAnalysis/SimpleParser";
+// import SimpleParser from "./src/syntaxAnalysis/SimpleParser";
 
-let simpleParser = new SimpleParser();
+import SimpleScript from "./src/interpreter/SimpleScript";
 
-const ast = simpleParser.parse("int age = 2 + 3; (age + 6) * 4;");
+// let simpleParser = new SimpleParser();
 
-simpleParser.dumpAST(ast, "");
+// const ast = simpleParser.parse("int age = 2 + 3; (age + 6) * 4;");
+
+// simpleParser.dumpAST(ast, "");
+
+new SimpleScript();
